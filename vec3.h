@@ -1,7 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include <cmath>
+#include "constants.h"
 
 class Vec3
 {

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <iostream>
-#include "vec3.h"
+#include "constants.h"
 
 using Colour = Vec3;
 using Color = Colour;
