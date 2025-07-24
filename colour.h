@@ -3,9 +3,10 @@
 #include <iostream>
 #include "vec3.h"
 
-using colour = Vec3;
+using Colour = Vec3;
+using Color = Colour;
 
-void write_colour(std::ostream& out, const colour& pixel_colour)
+void write_colour(std::ostream& out, const Colour& pixel_colour)
 {
     auto r = pixel_colour[0];
     auto g = pixel_colour[1];

@@ -6,22 +6,22 @@
 class Vec3
 {
     public:
-        float val[3];
+        double val[3];
 
         // constructors
         Vec3() : val{0, 0, 0} {}
-        Vec3(float x, float y, float z) : val{x, y, z} {}
+        Vec3(double x, double y, double z) : val{x, y, z} {}
 
         // getters
-        float x() const { 
+        double x() const { 
             return val[0]; 
         }
 
-        float y() const { 
+        double y() const { 
             return val[1]; 
         }
 
-        float z() const { 
+        double z() const { 
             return val[2]; 
         }
 
@@ -32,12 +32,12 @@ class Vec3
             return Vec3(-val[0], -val[1], -val[2]);
         }
 
-        float operator[](int i) const
+        double operator[](int i) const
         {
             return val[i];
         }
 
-        float& operator[](int i)
+        double& operator[](int i)
         {
             return val[i];
         }
@@ -74,16 +74,18 @@ class Vec3
             return *this;
         }
 
-        float length() const
+        double length() const
         {
             return std::sqrt(length_squared());
         }
 
-        float length_squared() const
+        double length_squared() const
         {
             return (val[0] * val[0]) + (val[1] * val[1]) + (val[2] * val[2]);
         }
 };
+
+using Point3 = Vec3;
 
 inline std::ostream& operator<<(std::ostream& out, const Vec3& v)
 {
@@ -107,24 +109,24 @@ inline Vec3 operator*(const Vec3& u, const Vec3& v)
 }
 
 // scalar vector operations
-inline Vec3 operator/(const Vec3& u, float v)
+inline Vec3 operator/(const Vec3& u, double v)
 {
     return Vec3(u.val[0] / v, u.val[1] / v, u.val[2] / v);
 }
 
-inline Vec3 operator*(float u, const Vec3& v)
+inline Vec3 operator*(double u, const Vec3& v)
 {
     return Vec3(u * v.val[0], u * v.val[1], u * v.val[2]);
 }
 
-inline Vec3 operator*(const Vec3& u, float v)
+inline Vec3 operator*(const Vec3& u, double v)
 {
     return Vec3(u.val[0] * v, u.val[1] * v, u.val[2] * v);
 }
 
-inline float dot(const Vec3& u, const Vec3& v)
+inline double dot(const Vec3& u, const Vec3& v)
 {
-    return (u * v).length();
+    return (u[0] * v[0]) + (u[1] * v[1]) + (u[2] * v[2]);
 }
 
 inline Vec3 cross(const Vec3& u, const Vec3& v)
