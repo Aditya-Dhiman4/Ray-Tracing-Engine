@@ -6,4 +6,4 @@ Features:
 - Multithreaded Rendering
 - Metal and Lambertian materials
 
-![Multiple Metal and Lambertian Spheres](https://github.com/AdityaDhiman-4/Ray-Tracing-Engine/blob/main/multiple-spheres.ppm?raw=true)
+![Multiple Metal and Lambertian Spheres](https://github.com/Aditya-Dhiman4/Ray-Tracing-Engine/blob/main/multiple-spheres.ppm?raw=true)
