@@ -82,6 +82,22 @@ class Vec3
         {
             return (val[0] * val[0]) + (val[1] * val[1]) + (val[2] * val[2]);
         }
+
+        bool near_zero() const
+        {
+            double s = 1e-8;
+            return (std::fabs(val[0]) < s) && (std::fabs(val[1]) < s) && (std::fabs(val[2]) < s);
+        }
+
+        static Vec3 random()
+        {
+            return Vec3(random_double(), random_double(), random_double());
+        }
+
+        static Vec3 random(double min, double max)
+        {
+            return Vec3(random_double(min, max), random_double(min, max), random_double(min, max));
+        }
 };
 
 using Point3 = Vec3;
@@ -138,4 +154,36 @@ inline Vec3 cross(const Vec3& u, const Vec3& v)
 inline Vec3 unit_vector(const Vec3& v)
 {
     return v / v.length();
+}
+
+inline Vec3 random_unit_vector()
+{   
+    while(true)
+    {
+        Vec3 p = Vec3::random(-1, 1);
+        double len_sq = p.length_squared();
+
+        if (1e-160 < len_sq && len_sq <= 1)
+        {
+            return p / sqrt(len_sq);
+        }
+    }
+}
+
+inline Vec3 random_on_hemisphere(const Vec3& normal)
+{
+    Vec3 random_vec = random_unit_vector();
+    if (dot(random_vec, normal) > 0.0)
+    {
+        return random_vec;
+    }
+    else
+    {
+        return -random_vec;
+    }
+}
+
+inline Vec3 reflect(const Vec3& v, const Vec3& n)
+{
+    return v - (2 * dot(v, n) * n);
 }
