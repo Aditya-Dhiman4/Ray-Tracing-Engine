@@ -8,15 +8,15 @@ class Vec3
         double val[3];
 
         // constructors
-        Vec3() : val{0, 0, 0} {}
-        Vec3(double x, double y, double z) : val{x, y, z} {}
+        constexpr Vec3() : val{0, 0, 0} {}
+        constexpr Vec3(double x, double y, double z) : val{x, y, z} {}
 
         // getters
-        double x() const { 
+        constexpr double x() const { 
             return val[0]; 
         }
 
-        double y() const { 
+        constexpr double y() const { 
             return val[1]; 
         }
 
@@ -26,12 +26,12 @@ class Vec3
 
 
         // operations
-        Vec3 operator-() const
+        constexpr Vec3 operator-() const
         {
             return Vec3(-val[0], -val[1], -val[2]);
         }
 
-        double operator[](int i) const
+        constexpr double operator[](int i) const
         {
             return val[i];
         }
@@ -78,7 +78,7 @@ class Vec3
             return std::sqrt(length_squared());
         }
 
-        double length_squared() const
+        constexpr double length_squared() const
         {
             return (val[0] * val[0]) + (val[1] * val[1]) + (val[2] * val[2]);
         }
@@ -108,43 +108,43 @@ inline std::ostream& operator<<(std::ostream& out, const Vec3& v)
 }
 
 // element wise vector operations
-inline Vec3 operator+(const Vec3& u, const Vec3& v)
+constexpr Vec3 operator+(const Vec3& u, const Vec3& v)
 {
     return Vec3(u.val[0] + v.val[0], u.val[1] + v.val[1], u.val[2] + v.val[2]);
 }
 
-inline Vec3 operator-(const Vec3& u, const Vec3& v)
+constexpr Vec3 operator-(const Vec3& u, const Vec3& v)
 {
     return Vec3(u.val[0] - v.val[0], u.val[1] - v.val[1], u.val[2] - v.val[2]);
 }
 
-inline Vec3 operator*(const Vec3& u, const Vec3& v)
+constexpr Vec3 operator*(const Vec3& u, const Vec3& v)
 {
     return Vec3(u.val[0] * v.val[0], u.val[1] * v.val[1], u.val[2] * v.val[2]);
 }
 
 // scalar vector operations
-inline Vec3 operator/(const Vec3& u, double v)
+constexpr Vec3 operator/(const Vec3& u, double v)
 {
     return Vec3(u.val[0] / v, u.val[1] / v, u.val[2] / v);
 }
 
-inline Vec3 operator*(double u, const Vec3& v)
+constexpr Vec3 operator*(double u, const Vec3& v)
 {
     return Vec3(u * v.val[0], u * v.val[1], u * v.val[2]);
 }
 
-inline Vec3 operator*(const Vec3& u, double v)
+constexpr Vec3 operator*(const Vec3& u, double v)
 {
     return Vec3(u.val[0] * v, u.val[1] * v, u.val[2] * v);
 }
 
-inline double dot(const Vec3& u, const Vec3& v)
+constexpr double dot(const Vec3& u, const Vec3& v)
 {
     return (u[0] * v[0]) + (u[1] * v[1]) + (u[2] * v[2]);
 }
 
-inline Vec3 cross(const Vec3& u, const Vec3& v)
+constexpr Vec3 cross(const Vec3& u, const Vec3& v)
 {
     return Vec3(u.val[1] * v.val[2] - u.val[2] * v.val[1],
                 u.val[2] * v.val[0] - u.val[0] * v.val[2],
@@ -183,7 +183,7 @@ inline Vec3 random_on_hemisphere(const Vec3& normal)
     }
 }
 
-inline Vec3 reflect(const Vec3& v, const Vec3& n)
+constexpr Vec3 reflect(const Vec3& v, const Vec3& n)
 {
     return v - (2 * dot(v, n) * n);
 }

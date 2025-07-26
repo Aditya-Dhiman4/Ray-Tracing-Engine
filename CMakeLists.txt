@@ -4,5 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 project(ray-tracing-engine VERSION 0.1.0 LANGUAGES C CXX)
 
+add_compile_options(-O3 -march=native)
+
 add_executable(ray-tracing-engine main.cpp)
 

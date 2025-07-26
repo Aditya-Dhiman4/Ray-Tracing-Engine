@@ -26,7 +26,7 @@ class Ray
             return b;
         }
 
-        Point3 at(double t) const
+        inline Point3 at(double t) const
         {
             return A + (t * b);
         }

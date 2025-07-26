@@ -1,6 +1,8 @@
 #pragma once
 
 #include <thread>
+#include <atomic>
+#include "immintrin.h"
 
 #include "constants.h"
 
@@ -14,31 +16,23 @@ class Camera
         int image_width = 1920;
         int samples_per_pixel = 10;
         int max_depth = 10;
+        int thread_granularity = 1;
 
         void render(const HittableList& objects)
         {
             initialize();
 
-            std::vector<Colour> image(image_width * image_height);
-
-            const int num_threads = 8;
+            const int num_threads = std::thread::hardware_concurrency();
             std::vector<std::thread> thread_list;
-            const int rows_per_thread = image_height / num_threads;
 
             std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
             for (int i = 0; i < num_threads; i++)
             {
-                int start = i * rows_per_thread;
-                int end = ((i+1) * rows_per_thread >= image_height) ? image_height : (i+1) * rows_per_thread;
-
                 thread_list.emplace_back(
                     &Camera::render_rows,
                     this,
-                    std::cref(objects),
-                    std::ref(image),
-                    start,
-                    end
+                    std::cref(objects)
                 );
             }
 
@@ -50,68 +44,26 @@ class Camera
             for (auto& pixel : image) {
                 write_colour(std::cout, pixel);
             }
-
-            // for (int j = 0; j < image_height; j++) 
-            // {
-            //     std::clog << "\rScanlines remaining: " << (image_height - j) << ' ' << std::flush;
-            //     for (int i = 0; i < image_width; i++) 
-            //     {
-            //         Colour pixel_colour(0,0,0);
-
-            //         for (int sample = 0; sample < samples_per_pixel; sample++)
-            //         {
-            //             Ray r = get_ray(i, j);
-            //             pixel_colour += ray_colour(r, max_depth, objects);
-            //         }
-
-            //         // write the pixel to the image
-            //         write_colour(std::cout, pixel_colour * pixel_sample_scale);
-            //     }
-            // }
-
-            // std::clog << "\rDone.                 \n";
-        }
-
-        void render_rows(const HittableList& objects, std::vector<Colour>& image, int row_start, int row_end)
-        {
-            int num_rows = row_end - row_start;
-            
-            for (int j = row_start; j < row_end; j++) 
-            {
-                // std::clog << "\rScanlines remaining: " << (num_rows - j) << ' ' << std::flush;
-                for (int i = 0; i < image_width; i++) 
-                {
-                    Colour pixel_colour(0,0,0);
-
-                    for (int sample = 0; sample < samples_per_pixel; sample++)
-                    {
-                        Ray r = get_ray(i, j);
-                        pixel_colour += ray_colour(r, max_depth, objects);
-                    }
-
-                    // write the pixel to the image
-                    image[(j * image_width) + i] = pixel_colour * pixel_sample_scale;
-                    // write_colour(std::cout, pixel_colour * pixel_sample_scale);
-                }
-            }
-
-            std::clog << "\rDone.                 \n";
         }
 
     private:
-        uint16_t image_height;
+        int image_height;
         Point3 pixel_ul_pos;
         Vec3 delta_u;
         Vec3 delta_v;
         Point3 camera_center;
         double pixel_sample_scale;
-    
+        std::vector<Colour> image;
+        std::atomic<int> row_count;
+
         void initialize()
         {
-            // Camera
-            image_height = uint16_t(image_width / aspect_ratio);
+            image_height = int(image_width / aspect_ratio);
             image_height = (image_height < 1) ? 1 : image_height;
 
+            image.assign(image_width * image_height, Colour{0,0,0});
+
+            // Camera
             double focal_length = 1.0;
             double viewport_height = 2.0;
             double viewport_width = viewport_height * (double(image_width)/image_height);
@@ -130,6 +82,44 @@ class Camera
             pixel_ul_pos = viewport_upper_left + 0.5 * (delta_u + delta_v);
 
             pixel_sample_scale = 1.0 / samples_per_pixel;
+
+            // initialize atomic count
+            row_count = 0;
+            
+        }
+
+        void render_rows(const HittableList& objects)
+        {
+
+            for(;;)
+            {
+                int row = row_count.fetch_add(1);
+                
+                // Exit if no rows left to render
+                if (row >= image_height) return;
+
+                int row_start = row;
+                int row_end = std::min(row + thread_granularity, image_height);
+                
+                for (int j = row_start; j < row_end; j++) 
+                {
+                    // std::clog << "\rScanlines remaining: " << (num_rows - j) << ' ' << std::flush;
+                    for (int i = 0; i < image_width; i++) 
+                    {
+                        Colour pixel_colour(0,0,0);
+
+                        for (int sample = 0; sample < samples_per_pixel; sample++)
+                        {
+                            Ray r = get_ray(i, j);
+                            pixel_colour += ray_colour(r, max_depth, objects);
+                        }
+
+                        // write the pixel to the image
+                        image[(j * image_width) + i] = pixel_colour * pixel_sample_scale;
+                    }
+                }
+            }
+            // std::clog << "\rDone.                 \n";
         }
     
         Ray get_ray(int i, int j)
