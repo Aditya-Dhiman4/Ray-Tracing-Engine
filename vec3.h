@@ -156,19 +156,37 @@ inline Vec3 unit_vector(const Vec3& v)
     return v / v.length();
 }
 
+// Marsaglia's Disk to Sphere Projection
 inline Vec3 random_unit_vector()
 {   
     while(true)
     {
-        Vec3 p = Vec3::random(-1, 1);
-        double len_sq = p.length_squared();
+        double u = random_double(-1, 1);
+        double v = random_double(-1, 1);
+        double s = (u*u) + (v*v);
 
-        if (1e-160 < len_sq && len_sq <= 1)
+        if (1e-160 < s && s <= 1)
         {
-            return p / sqrt(len_sq);
+            double t = 2 * std::sqrt(1 - s);
+            return Vec3(u * t, v * t, 1 - 2 * s);
         }
     }
 }
+
+// Rejection Sampling
+// inline Vec3 random_unit_vector()
+// {   
+//     while(true)
+//     {
+//         Vec3 p = Vec3::random(-1, 1);
+//         double len_sq = p.length_squared();
+
+//         if (1e-160 < len_sq && len_sq <= 1)
+//         {
+//             return p / sqrt(len_sq);
+//         }
+//     }
+// }
 
 inline Vec3 random_on_hemisphere(const Vec3& normal)
 {
