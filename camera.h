@@ -93,7 +93,7 @@ class Camera
 
             for(;;)
             {
-                int row = row_count.fetch_add(1);
+                int row = row_count.fetch_add(thread_granularity);
                 
                 // Exit if no rows left to render
                 if (row >= image_height) return;
