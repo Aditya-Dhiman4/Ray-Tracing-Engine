@@ -4,7 +4,7 @@
 #include <limits>
 #include <cmath>
 #include <iostream>
-#include <cstdlib>
+#include <random>
 #include <cstdint>
 
 using std::make_shared;
@@ -20,7 +20,9 @@ inline double deg_to_rad(double deg)
 
 inline double random_double()
 {
-    return std::rand() / (RAND_MAX + 1.0);
+    static std::uniform_real_distribution<double> dist(0.0, 1.0);
+    static std::mt19937 gen;
+    return dist(gen);
 }
 
 inline double random_double(double min, double max)
