@@ -3,7 +3,8 @@
 Based off of the book "Ray Tracing in One Weekend"
 
 Features:
-- Multithreaded Rendering
-- Metal and Lambertian materials
+- Configurable Multithreaded Rendering
+- Metal, Lambertian, dielectric materials
+- Camera FOV, DOF, positioning
 
 ![](images/final.png)
