@@ -6,4 +6,4 @@ Features:
 - Multithreaded Rendering
 - Metal and Lambertian materials
 
-![Multiple Metal and Lambertian Spheres](multiple-spheres.png)
+![](images/final.png)
