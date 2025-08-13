@@ -2,9 +2,10 @@
 
 #include <thread>
 #include <atomic>
+#include <filesystem>
 #include "immintrin.h"
 
-#include "constants.h"
+#include "utils.h"
 
 #include "hittable_list.h"
 #include "material.h"
@@ -12,17 +13,26 @@
 class Camera
 {
     public:
+        // image and performance configuration
         double aspect_ratio = 16.0 / 9.0;    
         int image_width = 1920;
         int samples_per_pixel = 10;
         int max_depth = 10;
         int thread_granularity = 1;
+        int num_threads = std::thread::hardware_concurrency();
+
+        // camera configuration
+        double vfov = 90;
+        Point3 lookfrom = Point3(0, 0, 0);
+        Point3 lookat = Point3(0, 0, -1);
+        Vec3 vup = Vec3(0, 1, 0);
+        double defocus_angle = 0;
+        double focus_dist = 10;
 
         void render(const HittableList& objects)
         {
             initialize();
 
-            const int num_threads = std::thread::hardware_concurrency();
             std::vector<std::thread> thread_list;
 
             std::cout << "P3\n" << image_width << ' ' << image_height << "\n255\n";
@@ -55,6 +65,9 @@ class Camera
         double pixel_sample_scale;
         std::vector<Colour> image;
         std::atomic<int> row_count;
+        Vec3 u, v, w;
+        Vec3 defocus_disk_u;
+        Vec3 defocus_disk_v;
 
         void initialize()
         {
@@ -64,22 +77,32 @@ class Camera
             image.assign(image_width * image_height, Colour{0,0,0});
 
             // Camera
-            double focal_length = 1.0;
-            double viewport_height = 2.0;
+            double vfov_radians = deg_to_rad(vfov);
+            double h = std::tan(vfov_radians / 2.0);
+            double viewport_height = 2 * h * focus_dist;
             double viewport_width = viewport_height * (double(image_width)/image_height);
-            camera_center = Point3(0, 0, 0);
+            camera_center = lookfrom;
+
+            // Camera Basis Vectors
+            w = unit_vector(lookfrom - lookat);
+            u = unit_vector(cross(vup, w));
+            v = cross(w, u);
 
             // Camera Vectors
-            Vec3 viewport_u = Vec3(viewport_width, 0, 0);
-            Vec3 viewport_v = Vec3(0, -viewport_height, 0);
+            Vec3 viewport_u = viewport_width * u;
+            Vec3 viewport_v = viewport_height * -v;
 
             // Camera Delta Vectors
             delta_u = viewport_u / image_width;
             delta_v = viewport_v / image_height;
 
             // Render
-            Vec3 viewport_upper_left = camera_center - Vec3(0, 0, focal_length) - (viewport_u / 2) - (viewport_v / 2);
+            Vec3 viewport_upper_left = camera_center - (focus_dist * w) - (viewport_u / 2) - (viewport_v / 2);
             pixel_ul_pos = viewport_upper_left + 0.5 * (delta_u + delta_v);
+
+            double defocus_radius = focus_dist * std::tan(deg_to_rad(defocus_angle / 2));
+            defocus_disk_u = u * defocus_radius;
+            defocus_disk_v = v * defocus_radius;
 
             pixel_sample_scale = 1.0 / samples_per_pixel;
 
@@ -127,10 +150,16 @@ class Camera
             Vec3 offset = sample_square();
             Vec3 pixel_sample = pixel_ul_pos + ((i + offset.x()) * delta_u) + ((j + offset.y()) * delta_v);
 
-            Point3 ray_origin = camera_center;
+            Point3 ray_origin = (defocus_angle <= 0) ? camera_center : defocus_disk_sample();
             Vec3 ray_direction = pixel_sample - ray_origin;
 
             return Ray(ray_origin, ray_direction);
+        }
+
+        Point3 defocus_disk_sample()
+        {
+            Point3 p = random_in_unit_disk();
+            return camera_center + (p[0] * defocus_disk_u) + (p[1] * defocus_disk_v);
         }
 
         Vec3 sample_square()

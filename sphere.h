@@ -44,7 +44,7 @@ class Sphere : public Hittable
             double root = (h - discriminantSqrt) / a;
             if (t.surrounds(root) == false)
             {
-                double root = (h + discriminantSqrt) / a;
+                root = (h + discriminantSqrt) / a;
                 if (t.surrounds(root) == false)
                 {
                     return false;

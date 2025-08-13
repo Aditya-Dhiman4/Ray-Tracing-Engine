@@ -45,3 +45,6 @@
 
 # Vscode
 /.vscode
+
+# Performance Profiling
+*.syscap
